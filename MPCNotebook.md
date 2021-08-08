@@ -1,6 +1,8 @@
-# Model Predictive Control 学习笔记
+# Model Predictive Control 学习笔记(8.6-8.13)
 
-## 1.1 模型预测控制算法基础[1] 8.6-8.13
+## 1.1 模型预测控制算法基础 
+
+> [1]3.1 概括了模型预测控制算法的原理
 
 模型预测控制的基本思想是利用**已有的模型**、**系统当前的状态**和**未来的控制量**去**预测系统未来的输出**，通过**滚动地求解带约束优化问题**来实现控制目的，具有预测模型，滚动优化和反馈校正三个特点。
 
@@ -22,7 +24,7 @@
 
 ### 1.2.1 Linear Quadratic Problem 
 
-> 1.2.1介绍了MPC中的线性二次型问题
+> [2]1.3.1 介绍了MPC解决线性二次型问题
 
 首先设计控制器来使得一个确定的线性系统状态回到origin， 如果setpoint是time-varying的， 那么将会跟踪setpoint的轨迹。离散系统模型可以表示为：
 
@@ -32,21 +34,37 @@
 
 ​				$$V(x(0)，\bold{u}) = \frac{1}{2}\sum_{k=0}^{N-1}[x(k)'Qx(k)+u(k)'Ru(k)]+\frac{1}{2}x(N)'P_fx(N)$$
 
-subject to 					$$x^+ = Ax+Bu$$
+subject to 					$$x^+ = Ax+Bu， x(0)=x_0$$ ​
 
-其中Q表示了牺牲较大的控制动作为代价，将状态快速驱动到原点，而R表示惩罚控制行为并减慢状态接近原点的速度，$P_f$​ 则表示对终端状态的惩罚。LQ control problem可以表示为：$\min_u V(x(0),\bold{u})$ 其中要求$Q, P_f$是半正定的，$R$​是正定的，来保证该问题存在且唯一。
+其中Q表示了牺牲较大的控制动作为代价，将状态快速驱动到原点，而R表示惩罚控制行为并减慢状态接近原点的速度，$P_f$​ 则表示对终端状态的惩罚。LQ control problem可以表示为：$\min_u V(x(0),\bold{u})$ 其中要求$Q, P_f$是半正定的，$R$​​是正定的，来保证该问题存在且唯一。
 
 ### 1.2.2 Optimizing Multistage Functions
 
-> 1.2.2主要介绍了如何求解$V(\cdot)$​​ 的多级优化函数的方法
->
-> 
+> [2]1.3.2主要介绍了如何求解形式如$V(\cdot)$ 的多级优化函数的方法
+
+给出一类多级优化函数：
+
+$$\min_{x,y,z}f(w,x)+g(x,y)+h(y,z)\quad w\quad \text{fixed}\quad(*)$$​​
+
+根据目标函数的特殊结构（每一个阶段的总成本函数仅取决于相邻的变量对）可以通过优化三个单变量问题来获得解：	$\min _{x}\left[f(w, x)+\min _{y}\left[g(x, y)+\min _{z} h(y, z)\right]\right]$​​  
+
+该求解结果可以表示为：
+
+<img src="D:\MPC_Learning_Note\MPCNotebook.assets\image-20210808173044028.png" alt="image-20210808173044028" style="zoom: 80%;" />
+
+这种分别嵌套求解多个目标函数最小值的方法被称为**dynamic programming (DP)** 。首先求解出最内层的$z$​​​​， 然后求解$y$​​​​， 最后求解$x$​​​​。为什么要讨论$(*)$​的求解？不难发现当$V(\cdot)$​​​​中的N取2时，其展开式可以写为：
+
+$$V(x(0)，\bold{u}) = \frac{1}{2}[x(0)'Qx(0)+u(0)'Ru(0)+x(1)'Qx(1)+u(1)'Ru(1)]+\frac{1}{2}x(2)'P_fx(2)$$
+
+其中$x(0)=x_0$， 可类比为$(*)$中的$w$，而$u(0)$是待设计的控制量，类比为$(*)$中的$x$，$x(1)$又与$x(0)， u(0)$满足$x^+=Ax+Bu$，即$x(1)=Ax(0)+Bu(0)$，相当于还是$x$,   $u(1)$又是待设计的控制量，类比为$y$，以此类推。显然，==每一个$k$项$x(k)'Qx(k)+u(k)'Ru(k)$都是一个阶段的优化函数$f(w,x)$或是$g(x,y)$​== ，那么对$(*)$​的研究就是很有必要的了。上述通过反向求解（先$z$ 后$y$ 再$x$ 的方法被称为**backward DP**
+
+
+
+## 2.1 
 
 > Page 89
 > MPC is, as we have seen earlier, a form of control in which the control action is obtained by solving online, at each sampling instant, a finite horizon optimal control problem in which the initial state is the current state of the plant. Optimization yields a finite control sequence, and the first control action in this sequence is applied to the plant. ==MPC differs, therefore, from conventional control in which the control law is precomputed offline. But this is not an essential difference; MPC implicitly implements a control law that can, in principle, be computed
 > offline as we shall soon see.== Specifically, if the current state of the system being controlled is $\chi$, MPC obtains, by solving an open-loop optimal control problem for this initial state, a specific control action $u$​ to apply to the plant.
-
-### 1.2.1 MPC标准模型
 
 连续非线性系统模型 $\frac{d x}{d t}=f(x, u)$​ ​
 
@@ -60,11 +78,14 @@ $$
 $$
 
 
+
 **[疑问]：**
 
 Q~1~ : 什么是在线进行和离线进行？有什么区别？
 
 Q~2~ : MPC和最优控制带约束有何区别？
+
+Q~3~ : 黎卡提方程的解？
 
 ****
 
