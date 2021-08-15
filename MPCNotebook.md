@@ -1,22 +1,40 @@
 # Model Predictive Control 学习笔记
 
-# (8.6-8.11) by JamesWu
+# (8.14-8.19) by JamesWu
+
+**[Learning Log]:**
+
+8.6-8.10 入门MPC，与老师和学长确定学习方向
+
+8.11 B站MATLAB_MPC官方教程 学会设计$N_p,N_c,Q,R$等参数的基本思想。学会调用MATLAB的MPC工具包
+
+8.12-8.13 有事暂停两天
+
+8.14 学习MPC 1.3.2，1.3.3节（给出方向：干扰预测）新理解：MPC其实是利用未来的信息推测出这一时刻的最优控制律，这个思想非常有意义并且很重要。
+
+8.15 disturbance prediction/disturbance rejection/disturbance observer之间有什么区别？
+
+8.16 
 
 **[疑问]：**
 
 **Q~1~ : 什么是在线进行和离线进行？有什么区别？**
 
++ 对于轨迹跟踪控制而言，在线进行和离线进行的区别是是否提前计算出所有的控制律（离线进行）和根据实时情况不断调整控制律（在线进行）
+
 **Q~2~ : MPC和最优控制中的极大值原理等、bang-bang控制有何区别？**
+
++ MPC是基于离散系统的控制方式，其在求解目标方程时利用的是DP算法求解，在求解时可以采用广泛的优化算法，而最优控制是根据Riccati方程的解来产生的。
 
 **Q~3~ : 为什么MPC研究的是离散对象？**
 
-+ 用于预测的需要？
++ 因为MPC研究的对象是根据一定采样频率来产生的。MPC需要一个求解QP问题的时间，这个时间需要由采样频率来过度。
 
-**Q~4~ : MPC控制器中在性能指标里存在参数（$Q, R, P_f$​​）等，但在控制律求解过程中包含采样时间$T_s, N_p$​**​​，相比滑模控制、PID控制等对参数敏感的控制器，==MPC对参数少的依赖性是否决定了其与其他控制器相比的优越性？例如不用考虑参数的鲁棒性等== 
+**Q~4~ : MPC控制器中在性能指标里存在参数（$Q, R, P_f$）等，但在控制律求解过程中包含采样时间$T_s, N_p$**，相比滑模控制、PID控制等对参数敏感的控制器，MPC对参数少的依赖性是否决定了其与其他控制器相比的优越性？事实上还是对参数的构造有需求的
 
 **Q~5~ : 如果只带入第一个增量，然后放弃后面所有的增量，为什么需要求出所有的增量？**
 
-+ 个人见解：当前时刻的增量是$N_p$​​​阶段内的最优结果，必须求出所有时刻的增量，另外根据forward DP求解，要求解出第一个阶段的$\Delta U$​​， 就必须依次倒序求出所有的$\Delta U$​​​​。==会不会造成求解资源浪费？在此处有没有优化的可能？==
++ 个人见解：当前时刻的增量是$N_p$​​​阶段内的最优结果，必须求出所有时刻的增量，另外根据forward DP求解，要求解出第一个阶段的$\Delta U$​​， 就必须依次倒序求出所有的$\Delta U$​​​​​。==会不会造成求解资源浪费？在此处有没有优化的可能？== 有：缩减预测步长和控制步长。
 
 ## 1 模型预测控制算法基础 
 
@@ -32,6 +50,19 @@
 显然，这样的滚动最优求解方式可以保证是全局最优的。（是吗？）
 
 MPC可以轻松地将将来的参考信息合并到控制问题中，以提高控制器的性能。
+
+模型预测控制的历史：
+
+（1）1978年，Richalet 、Mehra提出了基于脉冲响应的模型预测启发控制，后转化为模型算法控制(Model Algorithmic Control，MAC)；
+
+（2）1979年，Cutler提出了基于阶跃响应的动态矩阵控制(Dynamic Matrix Control，DMC)；
+
+（3）1987年，Clarke 提出了基于时间序列模型和在线辨识的广义预测控制(Generalized Predictive Control，GPC)；
+
+（4）1988年，袁璞提出了基于离散状态空间模型的状态反馈预测控制(State Feedback Predictive Control，SFPC)。
+------------------------------------------------
+版权声明：本文为CSDN博主「autotian」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_35379989/article/details/105914960
 
 ## 1.1 模型预测控制算法概述
 
@@ -64,6 +95,7 @@ Preface of this book：
 + 第2章讨论了非线性和约束系统的原点调节。该材料以统一的方式展示了过去20年中MPC的许多主要研究进展。它还包括最近才出现在研究文献中的主题，如对无法达到的设定点的调节。
 + 第3章讨论了MPC的鲁棒性设计，重点是MPC使用管或束轨迹代替单个标称轨迹。本章再次统一了大量与鲁棒MPC相关的研究文献。
 + 第4章介绍了状态估计，重点是移动视界估计，但也介绍了扩展和无迹卡尔曼滤波以及粒子滤波。
++ 第5-7章介绍了更专门的主题。第5章讨论了基于输出测量而非状态测量的MPC的特殊要求。第6章讨论了如何为分解为许多较小的交互子系统的大型系统设计分布式MPC控制器。第7章讨论约束线性系统的显式最优控制。这三章内容的选择可能因教师或学生自身的研究兴趣而异。
 
 ### 1.2.1 Linear Quadratic Problem 
 
@@ -114,6 +146,30 @@ $$
 \min_{w,x,y,z}f(w,x)+g(x,y)+h(y,z)=\min_w \underline{f}^0(w)=\min_z\overline{h}^0(z)
 $$
 
+**一些quadratic functions的和形式，这在下面求解LQP问题时非常有用。**
+
+$V_1(x)=(1/2)(x-a)'A(x-a)\quad V_2(x)=(1/2)(x-b)'B(x-b)$​
+
+1. 两个方程的和可以表示为另一个二次型
+
+   $V(x)=V_1(x)+V_2(x)=(1/2)(x'(A+B)x-2x'(Aa+Bb)+a'Aa+b'Bb)$
+
+   显然令$H=A+B,\quad\nu =H^{-1}(Aa+Bb),\quad d=-\nu'H\nu+a'Aa+b'Bb$​
+
+   可以将$V(x)$​化为二次型$V(x)=(1/2)((x-\nu)'H(x-\nu)+d)$​
+
+2. 考虑当$V_2(x)=(1/2)(Cx-b)'B(Cx-b)$时的和
+
+   ![image-20210815094600199](D:\MPC_Learning_Note\MPCNotebook.assets\image-20210815094600199.png)
+
+   分别令$H,\nu,d$​定义如上，可以将$V(x)$化为二次型：
+
+   $V(x)=(1/2)((x-\nu)'H(x-\nu)+d)$
+
+3. 将$V(x)$中的$H$表示为矩阵的逆的形式，这在状态估计器中很有帮助。
+
+<img src="D:\MPC_Learning_Note\MPCNotebook.assets\image-20210815101312888.png" alt="image-20210815101312888" style="zoom:80%;" />
+
 ### 1.2.3 Dynamic Programming Solution
 
 > [2]1.3.3节主要介绍了如何应用DP来求解LQ control problem
@@ -122,7 +178,55 @@ $$
 $$
 V(x(0),\bold{u})=\sum_{k=0}^{N-1}\ell(x(k),u(k))+\ell_N(x(N))\quad s.t.x^+=Ax+Bu
 $$
-stage cost $\ell(x,u)=(1/2)(x'Qx+u'Ru),k=0,...,N-1$, terminal stage cost$\ell_N(x)=(1/2)x'P_fx$ 因为$x(0)$​​​已知，所以采用backward DP算法求解。该求解结果与最优控制一书中的求解结果类似，都可以通过求解Riccati方程的解来表示。
+stage cost $\ell(x,u)=(1/2)(x'Qx+u'Ru),k=0,...,N-1$​​, terminal stage cost $\ell_N(x)=(1/2)x'P_fx$​​ 因为$x(0)$​​​​​已知，所以采用backward DP算法求解。
+
+首先将其分离为两部分，一部分包含最终状态，另一部分包含剩余部分，然后从最终状态不断迭代回初始状态：
+
+<img src="D:\MPC_Learning_Note\MPCNotebook.assets\image-20210815101830396.png" alt="image-20210815101830396" style="zoom:67%;" />
+
+最终状态满足以下方程的转换：
+
+![image-20210815101905961](D:\MPC_Learning_Note\MPCNotebook.assets\image-20210815101905961.png)
+
+显然，该方程显示当$u(N-1)=\nu$时，该方程最小。而$\nu$又是关于$x(N-1)$​的函数，那么记$u_{N-1}^0(x)=K(N-1)x$， 其中$K(N-1)$为系数，$x$指$x(N-1)$ 。$x_N^0(x)=(A+BK(N-1))x$也是关于$x$的函数，而$V_{N-1}^0(x)=(1/2)x'\Pi (N-1)x$
+
+其中：
+$$
+\begin{equation}
+\begin{aligned}
+&K(N-1):=-\left(B^{\prime} P_{f} B+R\right)^{-1} B^{\prime} P_{f} A \\
+&\Pi(N-1):=Q+A^{\prime} P_{f} A-A^{\prime} P_{f} B\left(B^{\prime} P_{f} B+R\right)^{-1} B^{\prime} P_{f} A
+\end{aligned}
+\end{equation}
+$$
+运用此方法不断迭代，可以得到以下的反向离散黎卡提迭代方程：
+$$
+\begin{array}{r}
+\Pi(k-1)=Q+A^{\prime} \Pi(k) A-A^{\prime} \Pi(k) B\left(B^{\prime} \Pi(k) B+R\right)^{-1} B^{\prime} \Pi(k) A \\
+k=N, N-1, \ldots, 1
+\end{array}
+$$
+终端条件：$\Pi(N)=P_f$
+
+每一个阶段的最优化控制策略是：$u_k^0(x)=K(k)x, k=N-1,N-2,...,0$
+
+时间$k$的最佳增益由时间$k+1$的Riccati矩阵计算得到：
+
+$$K(k)=-(B'\Pi(k+1)B+R)^{-1}B'\Pi(k+1)A\quad k=N-1,N-2,...,0$$
+
+从$k$时刻到$N$时刻的最优损失为：
+
+$$V_k^0=(1/2)x'\Pi(k)x$$
+
+当Q正定时，用椭圆法可在多项式时间内解二次规划问题。当Q非正定时，二次规划问题是NP困难的（NP-Hard）。即使Q只存在一个负特征值时，二次规划问题也是NP困难的.
+
+
+
+
+
+
+
+
 
 > 1.3.4节的无限平面LQ Problem、1.3.6节的收敛性问题属于证明类，暂时先跳过。1.3.5节的Controllability与现代控制理论相符合。1.4节的状态估计暂时没有阅读，预计先了解Kalman滤波之后再返回阅读。1.5节的跟踪，干扰和零补偿属于拓展，暂时先跳过。
 
@@ -288,6 +392,3 @@ $J=\frac{1}{2}\Delta U^\top H\Delta U+g^\top \Delta U$
 
 [2]Model Predictive Control: Theory, Computation, and Design 2nd Edition. James B. Santa Barbara, California. 2019
 
-**[Learning Log]:**
-
-8.11 B站MATLAB_MPC教程
