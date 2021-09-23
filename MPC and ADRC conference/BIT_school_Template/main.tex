@@ -1,0 +1,198 @@
+% !TEX encoding = UTF-8 Unicode
+\documentclass[
+10pt,
+aspectratio=169,
+]{beamer}
+\usepackage{xcolor}
+\definecolor{cream}{RGB}{253, 246, 227}
+\pagecolor{cream!90}
+\setbeamercovered{transparent=10}
+\usetheme[
+%  showheader,
+%  red,
+  purple,
+%  gray,
+%  graytitle,
+  colorblocks,
+%  noframetitlerule,
+]{Verona}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mac上使用如下命令声明隶书字体，windows也有相关方式，大家可自行修改
+\providecommand{\lishu}{\CJKfamily{zhli}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz}
+\usetikzlibrary{fadings}
+%
+%\setbeamertemplate{sections/subsections in toc}[ball]
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usefonttheme{professionalfonts}
+\def\mathfamilydefault{\rmdefault}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{bm}
+\setbeamertemplate{section in toc}{\hspace*{1em}\inserttocsectionnumber.~\inserttocsection\par}
+\setbeamertemplate{subsection in toc}{\hspace*{2em}\inserttocsectionnumber.\inserttocsubsectionnumber.~\inserttocsubsection\par}
+\setbeamerfont{subsection in toc}{size=\small}
+
+\AtBeginSection[]{%
+	\begin{frame}%
+		\frametitle{Contents}%
+		\textbf{\tableofcontents[currentsection]} %
+	\end{frame}%
+}
+
+\AtBeginSubsection[]{%
+	\begin{frame}%
+		\frametitle{Contents}%
+		\textbf{\tableofcontents[currentsection, currentsubsection]} %
+	\end{frame}%
+}
+
+\title[MPC and ADRC]{MPC and ADRC:Study, Inspiration and Combination}
+% \subtitle{A Simple while elegant template}
+\author[Z.Wu]{Zhiwei Wu}
+\mail{jameswu0526@gmail.com}
+\institute[Beijing Institute of Technology]{School of Automation\\
+Beijing Institute of Technology}
+\date{\today}
+\titlegraphic[width=3cm]{logo_01}{}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ----------- 标题页 ------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\begin{document}
+
+\maketitle
+
+%%% define code
+\defverbatim[colored]\lstI{
+	\begin{lstlisting}[language=C++,basicstyle=\ttfamily,keywordstyle=\color{red}]
+	int main() {
+	// Define variables at the beginning
+	// of the block, as in C:
+	CStash intStash, stringStash;
+	int i;
+	char* cp;
+	ifstream in;
+	string line;
+	[...]
+	\end{lstlisting}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ----------- FRAME ------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introductory of MPC}
+\subsection{Development of MPC}
+
+\begin{frame}{Development of MPC}
+	MPC的状态空间表达是最优控制理论中离散形式LQR继续发展的产物，是在线性二次型调节器(LQR)基础之上的拓展。MPC相比于传统线性二次型调节器的优势在于，MPC能够解决输入、状态包含约束的限制条件。通过实时求解二次型优化问题，滚动时域来确定一系列控制律，从而使得系统一直处于最优决策的状态下。
+	状态调节器的作用是，当某种原因使得系统的状态偏离平衡状态时，就对系统进行控制使之回到原平衡状态。
+	\begin{enumerate}
+		\item 输出状态调节器
+	\end{enumerate}
+\begin{table}[c]
+	\begin{tabular}{c|ccc}
+		  &无限时域离散LQR&有限时域离散LQR&基于状态空间的MPC\\\hline
+		 
+	\end{tabular}
+	\caption{MPC的演化过程}
+\end{table}
+\end{frame}
+\subsection{Blocks}
+\begin{frame}[c]{Blocks}
+	
+The blocks are shown below
+\begin{block}{Regular Block}
+	Content of a regular block
+\end{block}
+
+\begin{exampleblock}{Example Block}
+	Content of an example block
+\end{exampleblock}
+
+\begin{alertblock}{Alert block}
+	Content of an alert block
+\end{alertblock}
+
+\end{frame}	
+
+\subsection{Enumerate \& Overlays}
+
+\begin{frame}[c]{Enumerate \& Overlays}
+	
+{\large An Example of \texttt{enumerate}}
+	\begin{enumerate}[<+->]
+		\item First item
+		\item Second item
+		\item Third item
+	\end{enumerate}
+\vfill
+{\large An Example of \texttt{itemize}}	
+	\begin{itemize}[<+->]
+	\item First item
+	\item Second item
+	\item Third item
+	\end{itemize}
+\end{frame}	
+
+\subsection{Two columns}
+\begin{frame}[c]{Two columns}
+	
+\begin{columns}[onlytextwidth]
+	\column{0.4\textwidth}
+	Content for column one
+	\begin{equation}
+	E = mc^2
+	\end{equation}
+	\column{0.4\textwidth}	
+	Content for column two
+	\begin{equation}
+	F=ma
+	\end{equation}
+\end{columns}
+	
+\end{frame}	
+
+\subsection{Figures}
+\begin{frame}[c]{Figures}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+		\draw [help lines,very thick] (0,0) grid (5,4);
+		\end{tikzpicture}
+		\caption{Credits to Ti\textit{k}Z}
+	\end{figure}
+\end{frame}	
+
+\begin{frame}{A Listings Demo}{C++}
+	\lstI
+\end{frame}
+% Thank you page
+\beamertemplateshadingbackground{structure.fg!90}{structure.fg}
+\begin{frame}[plain]
+	\vfill
+	\centering
+	{
+		\centering \Huge \color{white} Thank you for your attention!\\[10pt]Questions?
+	}
+	\vfill
+\end{frame}
+
+\end{document}
+
+
